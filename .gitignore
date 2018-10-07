@@ -1,1 +1,4 @@
 miniflux-*
+miniflux*
+.idea/
+vendor
