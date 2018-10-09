@@ -32,6 +32,8 @@ const (
 	defaultOAuth2ClientSecret = ""
 	defaultOAuth2RedirectURL  = ""
 	defaultOAuth2Provider     = ""
+	defaultXcxId              = ""
+	defaultXcxSecret          = ""
 )
 
 // Config manages configuration parameters.
@@ -212,6 +214,14 @@ func (c *Config) PocketConsumerKey(defaultValue string) string {
 // ProxyImages returns "none" to never proxy, "http-only" to proxy non-HTTPS, "all" to always proxy.
 func (c *Config) ProxyImages() string {
 	return getStringValue("PROXY_IMAGES", defaultProxyImages)
+}
+
+func (c *Config) XcxId() string {
+	return getStringValue("XCX_ID", defaultXcxId)
+}
+
+func (c *Config) XcxSecret() string {
+	return getStringValue("XCX_SECRET", defaultXcxSecret)
 }
 
 // NewConfig returns a new Config.

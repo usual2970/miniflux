@@ -134,6 +134,18 @@ func (u *userModification) Update(user *model.User) {
 	}
 }
 
+func decodeUserExtarModificationPayload(r io.ReadCloser) (map[string]string, error) {
+	userExtra := make(map[string]string)
+
+	decoder := json.NewDecoder(r)
+
+	if err := decoder.Decode(&userExtra); err != nil {
+		return nil, fmt.Errorf("Unable to decode userExtra modification JSON object: %v", err)
+	}
+
+	return userExtra,nil
+}
+
 func decodeUserModificationPayload(r io.ReadCloser) (*userModification, error) {
 	defer r.Close()
 

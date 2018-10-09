@@ -95,6 +95,28 @@ func (c *Controller) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	json.Created(w, originalUser)
 }
 
+// UpdateSelf is the API handler to update the given user.
+func (c *Controller) UpdateSelf(w http.ResponseWriter, r *http.Request) {
+	userID := request.UserID(r)
+
+	userExtra, err := decodeUserExtarModificationPayload(r.Body)
+	if err != nil {
+		json.BadRequest(w, err)
+		return
+	}
+
+	for key, val := range userExtra {
+
+		err := c.store.UpdateExtraField(userID, key, val)
+		if err != nil {
+			json.BadRequest(w, errors.New("Unable to update extra this user from the database"))
+			return
+		}
+	}
+
+	json.NoContent(w)
+}
+
 // Users is the API handler to get the list of users.
 func (c *Controller) Users(w http.ResponseWriter, r *http.Request) {
 	if !request.IsAdminUser(r) {

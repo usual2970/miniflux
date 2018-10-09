@@ -46,6 +46,10 @@ func routes(cfg *config.Config, store *storage.Storage, feedHandler *feed.Handle
 		w.Write([]byte("User-agent: *\nDisallow: /"))
 	})
 
+	xcxRouter := router.PathPrefix("/xcx").Subrouter()
+	xcxRouter.Use(middleware.Xcx)
+	xcxRouter.HandleFunc("/", apiController.XcxLogin).Methods("GET")
+
 	feverRouter := router.PathPrefix("/fever").Subrouter()
 	feverRouter.Use(middleware.FeverAuth)
 	feverRouter.HandleFunc("/", feverController.Handler).Name("feverEndpoint")
@@ -56,6 +60,7 @@ func routes(cfg *config.Config, store *storage.Storage, feedHandler *feed.Handle
 	apiRouter.HandleFunc("/users", apiController.Users).Methods("GET")
 	apiRouter.HandleFunc("/users/{userID:[0-9]+}", apiController.UserByID).Methods("GET")
 	apiRouter.HandleFunc("/users/{userID:[0-9]+}", apiController.UpdateUser).Methods("PUT")
+	apiRouter.HandleFunc("/me", apiController.UpdateSelf).Methods("PUT")
 	apiRouter.HandleFunc("/users/{userID:[0-9]+}", apiController.RemoveUser).Methods("DELETE")
 	apiRouter.HandleFunc("/users/{username}", apiController.UserByUsername).Methods("GET")
 	apiRouter.HandleFunc("/me", apiController.CurrentUser).Methods("GET")

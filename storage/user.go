@@ -93,8 +93,8 @@ func (s *Storage) CreateUser(user *model.User) (err error) {
 
 // UpdateExtraField updates an extra field of the given user.
 func (s *Storage) UpdateExtraField(userID int64, field, value string) error {
-	query := fmt.Sprintf(`UPDATE users SET extra = hstore('%s', $1) WHERE id=$2`, field)
-	_, err := s.db.Exec(query, value, userID)
+	query := fmt.Sprintf(`UPDATE users SET extra = extra || '"%s"=>"%s"'::hstore WHERE id=$1`, field, value)
+	_, err := s.db.Exec(query, userID)
 	if err != nil {
 		return fmt.Errorf("unable to update user extra field: %v", err)
 	}
