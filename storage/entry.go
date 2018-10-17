@@ -5,8 +5,11 @@
 package storage // import "miniflux.app/storage"
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/lib/pq/hstore"
+	"regexp"
 	"time"
 
 	"miniflux.app/logger"
@@ -66,11 +69,15 @@ func (s *Storage) UpdateEntryContent(entry *model.Entry) error {
 func (s *Storage) createEntry(entry *model.Entry) error {
 	query := `
 		INSERT INTO entries
-		(title, hash, url, comments_url, published_at, content, author, user_id, feed_id, document_vectors)
+		(title, hash, url, comments_url, published_at, content, author, user_id, feed_id, document_vectors, extra)
 		VALUES
-		($1, $2, $3, $4, $5, $6, $7, $8, $9, to_tsvector($1 || ' ' || coalesce($6, '')))
+		($1, $2, $3, $4, $5, $6, $7, $8, $9, to_tsvector($1 || ' ' || coalesce($6, '')), $10)
 		RETURNING id, status
 	`
+
+	extra := hstore.Hstore{Map: make(map[string]sql.NullString)}
+	extra.Map["img"] = sql.NullString{String: getImg(entry.Content), Valid: true}
+	
 	err := s.db.QueryRow(
 		query,
 		entry.Title,
@@ -82,6 +89,7 @@ func (s *Storage) createEntry(entry *model.Entry) error {
 		entry.Author,
 		entry.UserID,
 		entry.FeedID,
+		extra,
 	).Scan(&entry.ID, &entry.Status)
 
 	if err != nil {
@@ -275,4 +283,13 @@ func (s *Storage) EntryURLExists(userID int64, entryURL string) bool {
 	query := `SELECT count(*) as c FROM entries WHERE user_id=$1 AND url=$2`
 	s.db.QueryRow(query, userID, entryURL).Scan(&result)
 	return result >= 1
+}
+
+func getImg(html string) string {
+	reg := regexp.MustCompile(`img\\s+src="(.*?)"`)
+	rs := reg.FindStringSubmatch(html)
+	if len(rs) == 0 {
+		return ""
+	}
+	return rs[1]
 }

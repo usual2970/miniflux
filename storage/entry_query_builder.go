@@ -190,7 +190,7 @@ func (e *EntryQueryBuilder) GetEntries() (model.Entries, error) {
 	query := `
 		SELECT
 		e.id, e.user_id, e.feed_id, e.hash, e.published_at at time zone u.timezone, e.title,
-		e.url, e.comments_url, e.author, e.content, e.status, e.starred,
+		e.url, e.comments_url, e.author, e.content, e.status, e.starred, e.extra,
 		f.title as feed_title, f.feed_url, f.site_url, f.checked_at,
 		f.category_id, c.title as category_title, f.scraper_rules, f.rewrite_rules, f.crawler, f.user_agent,
 		fi.icon_id,
