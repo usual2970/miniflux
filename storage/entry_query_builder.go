@@ -6,6 +6,7 @@ package storage // import "miniflux.app/storage"
 
 import (
 	"fmt"
+	"github.com/lib/pq/hstore"
 	"strings"
 	"time"
 
@@ -217,9 +218,10 @@ func (e *EntryQueryBuilder) GetEntries() (model.Entries, error) {
 
 	entries := make(model.Entries, 0)
 	for rows.Next() {
-		var entry model.Entry
+		entry := model.NewEntry()
 		var iconID interface{}
 		var tz string
+		var extra hstore.Hstore
 
 		entry.Feed = &model.Feed{}
 		entry.Feed.Category = &model.Category{}
@@ -238,6 +240,7 @@ func (e *EntryQueryBuilder) GetEntries() (model.Entries, error) {
 			&entry.Content,
 			&entry.Status,
 			&entry.Starred,
+			&extra,
 			&entry.Feed.Title,
 			&entry.Feed.FeedURL,
 			&entry.Feed.SiteURL,
@@ -270,7 +273,13 @@ func (e *EntryQueryBuilder) GetEntries() (model.Entries, error) {
 		entry.Feed.UserID = entry.UserID
 		entry.Feed.Icon.FeedID = entry.FeedID
 		entry.Feed.Category.UserID = entry.UserID
-		entries = append(entries, &entry)
+
+		for key, value := range extra.Map {
+			if value.Valid {
+				entry.Extra[key] = value.String
+			}
+		}
+		entries = append(entries, entry)
 	}
 
 	return entries, nil

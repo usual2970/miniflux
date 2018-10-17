@@ -38,6 +38,12 @@ type Entry struct {
 	Extra       map[string]string `json:"extra"`
 }
 
+func NewEntry() *Entry {
+	return &Entry{
+		Extra: make(map[string]string),
+	}
+}
+
 // Entries represents a list of entries.
 type Entries []*Entry
 

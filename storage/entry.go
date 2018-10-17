@@ -77,7 +77,7 @@ func (s *Storage) createEntry(entry *model.Entry) error {
 
 	extra := hstore.Hstore{Map: make(map[string]sql.NullString)}
 	extra.Map["img"] = sql.NullString{String: getImg(entry.Content), Valid: true}
-	
+
 	err := s.db.QueryRow(
 		query,
 		entry.Title,
@@ -286,7 +286,7 @@ func (s *Storage) EntryURLExists(userID int64, entryURL string) bool {
 }
 
 func getImg(html string) string {
-	reg := regexp.MustCompile(`img\\s+src="(.*?)"`)
+	reg := regexp.MustCompile("img\\s+src=\"(.*?)\"")
 	rs := reg.FindStringSubmatch(html)
 	if len(rs) == 0 {
 		return ""
