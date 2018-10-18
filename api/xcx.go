@@ -20,19 +20,32 @@ func (c *Controller) XcxLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if user == nil {
-		newUser := model.NewUser()
-		newUser.Username = xcxObject.Openid
-		newUser.IsAdmin = false
-		newUser.Extra["unionid"] = xcxObject.Unionid
-		newUser.Extra["openid"] = xcxObject.Openid
-		err := c.store.CreateUser(newUser)
+		user = model.NewUser()
+		user.Username = xcxObject.Openid
+		user.IsAdmin = false
+		user.Extra["unionid"] = xcxObject.Unionid
+		user.Extra["openid"] = xcxObject.Openid
+		err := c.store.CreateUser(user)
 
 		if err != nil {
 			logger.Error("[Controller:XcxLogin] %v", err)
 			json.ServerError(w, err)
 			return
 		}
+
+		cate, err := c.store.CategoryByTitle(user.ID, "All")
+		if err != nil || cate == nil {
+			logger.Error("[Controller:XcxLogin] %v", err)
+			json.ServerError(w, err)
+			return
+		}
+
+		c.feedHandler.CreateFeed(user.ID, cate.ID, "http://www.zhihu.com/rss", false, "", "", "")
+
 	}
+
+
+
 	json.OK(w, r, xcxObject)
 
 }

@@ -271,6 +271,16 @@ func (s *Storage) RemoveUser(userID int64) error {
 	return nil
 }
 
+func (s *Storage) LastUser() (*model.User, error) {
+	defer timer.ExecutionTime(time.Now(), "[Storage:LastUser]")
+	query := `
+		SELECT
+			id, username, is_admin, theme, language, timezone, entry_direction, last_login_at, extra
+		FROM users
+		ORDER BY id DESC LIMIT 1`
+	return s.fetchUser(query)
+}
+
 // Users returns all users.
 func (s *Storage) Users() (model.Users, error) {
 	defer timer.ExecutionTime(time.Now(), "[Storage:Users]")
